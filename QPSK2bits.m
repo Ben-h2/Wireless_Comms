@@ -7,8 +7,8 @@ function info_bits = QPSK2bits(info_symbols)
     info_bits=zeros(L,1);        % column vector space allocated
 
     % Decode real and imaginary of symbols separately into bits
-    I = real(info_symbols)>0;
-    Q = imag(info_symbols)>0;
+    I = real(info_symbols)<=0;
+    Q = imag(info_symbols)<=0;
     
     % Parse bits back together
     for k=1:2:L - 1
