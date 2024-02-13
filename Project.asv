@@ -74,19 +74,15 @@ end
 % Do fft
 OFDM_rx_subs = zeros(N_syms,K_subs);
 OFDM_rx_norm = zeros(N_syms,K_subs);
-h_tilda = fft([h zeros(1,11)]);
 for n = 1:N_syms
     OFDM_rx_subs(n,:) = fft(OFDM_rx_useful(n,:));
-    OFDM_rx_norm(n,:) = OFDM_rx_subs(n,:) ./ h_tilda;
+    OFDM_rx_norm(n,:)
 
     % figure()
     % scatter(real(OFDM_rx_subs(n,:)), imag(OFDM_rx_subs(n,:)))
 
     figure()
     plot(abs(OFDM_rx_subs(n,:)))
-    
-    figure()
-    plot(OFDM_rx_norm(n,:))
 end
 
 
