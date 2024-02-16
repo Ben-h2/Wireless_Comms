@@ -79,7 +79,7 @@ for k = 1:OFDM_symbols
     %% Step 6: One-tap equalization
     
     % fft of h
-    h_fd = vect_DFT(h_td, 16);
+    h_fd = vect_DFT(h_td, N);
     
     d_fd_Rx = y_fd./h_fd;
     
@@ -100,11 +100,6 @@ QPSK_syms_Rx = reshape(QPSK_syms_Rx2, [N.*OFDM_symbols, 1]);
 b_Rx = QPSK2bits(QPSK_syms_Rx);
 b_Rx2 = reshape(b_Rx, [N.*Bits_per_QPSK_Symbol, OFDM_symbols]);
 
-%% testing
-aaa = [1+1j, 1-1j, -1+1j, -1-1j];
-aaa = aaa.';
-bbb = QPSK2bits(aaa);
-
 %% Test/Check QPSK symbols
 
 diff1 = QPSK_syms_Rx2 - QPSK_syms_Tx2;       % Should be 0's
@@ -115,6 +110,22 @@ diff2 = b_Rx2 - b_Tx2;
 disp(diff2)
 disp('Difference in bits')
 
+figure()
+p1 = plot(QPSK_syms_Tx);
+hold on
+p2 = plot(QPSK_syms_Rx);
+xlabel('Real')
+ylabel('Imaginary')
+title('Constellation Diagram')
+axis([-1, 1, -1, 1])
+p1.Color = "blue";
+p1.Marker = '*';
+p1.MarkerSize = 6;
+p1.LineStyle = "none";
+p2.Color = "red";
+p2.Marker = '*';
+p2.MarkerSize = 3;
+p2.LineStyle = "none";
 
 %% functions
 
@@ -203,7 +214,7 @@ function info_bits = QPSK2bits(info_symbols)
     
     % Parse bits back together
     for k=1:2:L - 1
-        info_bits(k)=I((k+1)/2);
-        info_bits(k+1)=Q((k+1)/2);
+        info_bits(k)=Q((k+1)/2);
+        info_bits(k+1)=I((k+1)/2);
     end % end interleaving for loop
 end % function
