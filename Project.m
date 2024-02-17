@@ -9,7 +9,7 @@ L_taps = length(h);
 
 % Declare number of subcarriers and number of OFDM symbols
 K_subs = 16;
-N_syms = 1;
+N_syms = 4;
 
 % Create array of each symbol and its corresponding subcarriers
 OFDM_syms = zeros(N_syms,K_subs);
@@ -18,8 +18,8 @@ OFDM_syms = zeros(N_syms,K_subs);
 for n = 1:N_syms
     OFDM_syms(n,:) = createOFDMsymbols(K_subs);
     
-    figure()
-    plot(abs(OFDM_syms(n,:)))
+    % figure()
+    % plot(abs(OFDM_syms(n,:)))
 
     % disp(OFDM_syms(n,:))
     % figure()
@@ -82,8 +82,8 @@ for n = 1:N_syms
     % figure()
     % scatter(real(OFDM_rx_subs(n,:)), imag(OFDM_rx_subs(n,:)))
 
-    figure()
-    plot(abs(OFDM_rx_subs(n,:)))
+    % figure()
+    % plot(abs(OFDM_rx_subs(n,:)))
     
     figure()
     plot(OFDM_rx_norm(n,:))
