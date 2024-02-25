@@ -51,33 +51,44 @@ end
 
 % Convolute with channel
 OFDM_rx = conv(OFDM_tx,h);
+for n = 1:N_syms
+    OFDM_rx2(n,:) = conv(OFDM_cp(n,:),h);
+end
+
 % figure()
 % plot(real(OFDM_rx),'blue')
 % plot(imag(OFDM_rx),'red')
 
 % Isolate the useful signal
 OFDM_rx_useful = zeros(N_syms,K_subs);
+OFDM_rx_useful2 = zeros(N_syms,K_subs);
 for n = 1:N_syms
     p1 = n*(L_taps-1) + 1;
-    disp(p1)
+    p1_0 = (L_taps-1) + 1;
     p2 = p1+K_subs-1;
-    disp(p2)
+    p2_0 = p1_0+K_subs-1;
     OFDM_rx_useful(n,:) = OFDM_rx(p1:p2);
+    OFDM_rx_useful2(n,:) = OFDM_rx2(n,p1_0:p2_0);
 
     % figure()
     % plot(real(OFDM_cp(n,:)),'blue')
     % plot(imag(OFDM_cp(n,:)),'red')
-
-
 end
 
 % Do fft
 OFDM_rx_subs = zeros(N_syms,K_subs);
 OFDM_rx_norm = zeros(N_syms,K_subs);
+
+OFDM_rx_subs2 = zeros(N_syms,K_subs);
+OFDM_rx_norm2 = zeros(N_syms,K_subs);
+
 h_tilda = fft([h zeros(1,11)]);
 for n = 1:N_syms
     OFDM_rx_subs(n,:) = fft(OFDM_rx_useful(n,:));
     OFDM_rx_norm(n,:) = OFDM_rx_subs(n,:) ./ h_tilda;
+
+    OFDM_rx_subs2(n,:) = fft(OFDM_rx_useful2(n,:));
+    OFDM_rx_norm2(n,:) = OFDM_rx_subs2(n,:) ./ h_tilda;
 
     % figure()
     % scatter(real(OFDM_rx_subs(n,:)), imag(OFDM_rx_subs(n,:)))
@@ -86,7 +97,7 @@ for n = 1:N_syms
     % plot(abs(OFDM_rx_subs(n,:)))
     
     figure()
-    plot(OFDM_rx_norm(n,:))
+    plot(OFDM_rx_norm2(n,:))
 end
 
 
