@@ -1,8 +1,6 @@
 clear all
 close all
 clc
-% Timer
-tic
 
 load("benchmark_parameter_174623_1472.mat")
 load("benchmark_rece_data_174623_1472.mat")
@@ -115,14 +113,12 @@ for n_01 = 2200:2400
             Y_BB_1_hat_down(i) = Y_BB_1_hat(k*lambda);
         end
         % 3 Obtain the frequency domain 
-        % for m = 1:k-1
-        %     z(1,m) = 0;
-        %     for i = 1:k+L
-        %         Z_1(1,m) = z(1,m)+Y_BB_1_hat_down(i)*exp(-1j*2*pi*m*(i-1)/k);
-        %     end
-        % end
-        Z_1 = zp_fft(Y_BB_1_hat_down,k);
-
+        for m = 1:k-1
+            z(1,m) = 0;
+            for i = 1:k+L
+                Z_1(1,m) = z(1,m)+Y_BB_1_hat_down(i)*exp(-1j*2*pi*m*(i-1)/k);
+            end
+        end
         % 4 calculate the power over null subcarriers
         P_nuu(ninx,epsinx)=0;
         for m = 1:k-1
@@ -131,6 +127,3 @@ for n_01 = 2200:2400
 
     end
 end
-
-% Timer
-toc
