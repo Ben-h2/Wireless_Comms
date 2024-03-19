@@ -1,6 +1,6 @@
 clear all
 close all
-clc
+
 % Import Util
 addpath('util');
 addpath('data');
@@ -104,6 +104,9 @@ Y_BB_bar = conv(Y_BB,R);
 
 % plot(abs(Y_BB_bar))
 Y_BB_bar = Y_BB_bar(4583:end); %Starting index found through inspection
+figure()
+plot(real(Y_BB_bar))
+title('Y_BB_bar','Fontsize',14)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 9 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Grid search
@@ -111,7 +114,7 @@ Y_BB_bar = Y_BB_bar(4583:end); %Starting index found through inspection
 ninx = 0;
 epsinx = 0;
 
-for n_01 = 2200:2400
+for n_01 = 1:500
     ninx = ninx+1;
     for eps_1 = -2:0.1:2
         epsinx = epsinx+1;
@@ -133,13 +136,28 @@ for n_01 = 2200:2400
         Z_1 = zp_fft(Y_BB_1_hat_down,k);
 
         % 4 calculate the power over null subcarriers
-        P_nuu(ninx,epsinx)=0;
+        P_null(ninx,epsinx)=0;
         for m = 1:length(k_null)
-            P_nuu(ninx,epsinx)= P_nuu(ninx,epsinx) + abs(Z_1(k_null(m)))^2;
+            P_null(ninx,epsinx)= P_null(ninx,epsinx) + abs(Z_1(k_null(m)))^2;
         end
     end
     epsinx = 0;
 end
+
+
+% Find lowest P_null value for CFO and N01
+A = P_null;
+[~, inx_N01] = min(min(A'));
+[~, inx_CF0] = min(min(A));
+disp(inx_N01);
+disp(inx_CF0);
+
+% Plot P_null
+figure()
+s = pcolor(P_null');
+set(s,'EdgeColor','none');
+xlabel('N_01','Fontsize',14);
+ylabel('CFO','Fontsize',14);
 
 % Timer
 toc
