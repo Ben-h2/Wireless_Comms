@@ -1,1 +1,2 @@
-x = [-2:0.1:2]
+addpath('util')
+x = zp_fft(zeros(1,10000),6000);

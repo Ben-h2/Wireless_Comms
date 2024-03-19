@@ -1,6 +1,10 @@
 clear all
 close all
 clc
+% Import Util
+addpath('util');
+addpath('data');
+
 % Timer
 tic
 
