@@ -10,6 +10,11 @@ tic
 
 load("benchmark_parameter_174623_1472.mat")
 load("benchmark_rece_data_174623_1472.mat")
+load('ofdm_map.mat')
+
+% Find Null SubK's
+iszero = (ofdm_map == 0);
+k_null = find(iszero);
 
 k = 2048; %Total Number of Subcarriers
 L = 200; %The number of zero padded symbols
@@ -108,15 +113,15 @@ epsinx = 0;
 
 for n_01 = 2200:2400
     ninx = ninx+1;
-    epsinx = epsinx+1;
     for eps_1 = -2:0.1:2
+        epsinx = epsinx+1;
         % 1 CFO compensation
         for n = 1:(k+L)*lambda
             Y_BB_1_hat(n) = Y_BB_bar(n_01+n-1)*exp(-1j*2*pi*eps_1*(n_01+n-1)*ts);
         end
         % 2 Down-Sampling
         for i = 1:k+L
-            Y_BB_1_hat_down(i) = Y_BB_1_hat(k*lambda);
+            Y_BB_1_hat_down(i) = Y_BB_1_hat(i*lambda);
         end
         % 3 Obtain the frequency domain 
         % for m = 1:k-1
@@ -129,11 +134,11 @@ for n_01 = 2200:2400
 
         % 4 calculate the power over null subcarriers
         P_nuu(ninx,epsinx)=0;
-        for m = 1:k-1
-            P_nuu(ninx,epsinx)= P_nuu(ninx,epsinx) + abs(Z_1(m))^2;
+        for m = 1:length(k_null)
+            P_nuu(ninx,epsinx)= P_nuu(ninx,epsinx) + abs(Z_1(k_null(m)))^2;
         end
-
     end
+    epsinx = 0;
 end
 
 % Timer
