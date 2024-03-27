@@ -11,6 +11,7 @@ tic
 
 load("benchmark_parameter_174623_1472.mat")
 load("benchmark_rece_data_174623_1472.mat")
+load("benchmark_Zw_174623_1472.mat")
 load('ofdm_map.mat')
 
 % Find Null SubK's
@@ -27,7 +28,10 @@ lambda = 24; %The over sampling factor
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Passband filtering
-Y_pb = bandpass(rece_data_ofdm_bench,[-1000+Fc,8000+Fc],sampling_rate);
+Y_pb = bandpass(rece_data_ofdm_bench,[-4000+Fc,4000+Fc],sampling_rate);
+figure()
+plot(Y_pb)
+title('OG sample')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -36,8 +40,9 @@ v = 1.03; % Moving Speed
 c = 1500; % Speed of Sound
 a = v/c;
 T_tx = 8.2695; % Transmitted signal duration
-T_rx = (1/sampling_rate)*2117317; % Ask TA how to calculate this value.
-a_hat = 5E-5;%T_tx/T_rx -1;
+T_rx = (1/sampling_rate)*2116900; % Ask TA how to calculate this value.
+a_hat = T_tx/T_rx -1;
+a_hat = 5e-5;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Resampling with a_hat
@@ -145,26 +150,6 @@ for n_inx = 1:length(start_pos)
     end
 end
 
-
-% for n_01 = 2200:2400
-%     ninx = ninx+1;
-%     for eps_1 = -2:0.1:2
-%         epsinx = epsinx+1;
-%         % 1-2 CFO compensation and Down Sampling
-%         n = n_01+[0:lambda:(K+L)*lambda-1];
-%         Y_BB_1_hat_down = Y_BB_bar(n).*exp(-1j*2*pi*eps_1*(n)*ts);
-% 
-%         % 3 Obtain the frequency domain 
-%         Z_1 = zp_fft(Y_BB_1_hat_down,K);
-% 
-%         % 4 calculate the power over null subcarriers
-%         P_null(ninx,epsinx)=0;
-%         for m = 1:length(k_null)
-%             P_null(ninx,epsinx)= P_null(ninx,epsinx) + abs(Z_1(k_null(m)))^2;
-%         end
-%     end
-%     epsinx = 0;
-% end
 [~,inx] = min(P_null(:));
 [ninx,epsinx]=ind2sub(size(P_null),inx);
 
@@ -172,12 +157,14 @@ n_start = 2200 + ninx;
 disp(n_start)
 eps_start = -2 + epsinx*0.1;
 disp(eps_start)
+
 figure();
 h = pcolor(P_null');
 set(h,'EdgeColor','None')
 title('Power of Null SubKs','FontSize',14)
 xlabel('Starting Index','FontSize',14)
 ylabel('Carrier Freq Offset (CFO)','FontSize',14)
+colorbar
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% STEP 10 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Grid Search for all subcarriers
@@ -186,6 +173,15 @@ symbol_start_pos = zeros(1,num_OFDM_symbols);
 symbol_CFO = zeros(1,num_OFDM_symbols);
 symbol_start_pos(1) = n_start;
 symbol_CFO(1) = eps_start;
+
+%%% Z Values
+n = n_start+[0:lambda:(K+L)*lambda-1];
+Y_BB_1_hat_down = Y_BB_bar(n).*exp(-1j*2*pi*eps_start*(n)*ts);
+
+Z_values = zeros(K,num_OFDM_symbols);
+% Z_values = zeros(K+L,num_OFDM_symbols); % GOOFBALL
+Z_values(:,1) = zp_fft(Y_BB_1_hat_down,K);
+% Z_values(:,1) = fft(Y_BB_1_hat_down); % GOOFBALL
 
 % epsilon = [-10:0.5:10];
 epsilon = [-2:0.1:2];
@@ -220,6 +216,14 @@ for W = 2:num_OFDM_symbols
 symbol_start_pos(W) = symbol_start_pos(W-1)+(K+L)*lambda + ninx;
 symbol_CFO(W) = epsilon(eps_inx);
 
+%%% Z VALUES
+n = symbol_start_pos(W)+[0:lambda:(K+L)*lambda-1];
+Y_BB_1_hat_down = Y_BB_bar(n).*exp(-1j*2*pi*symbol_CFO(W)*(n)*ts);
+
+Z_values(:,W) = zp_fft(Y_BB_1_hat_down,K);
+% Z_values(:,W) = fft(Y_BB_1_hat_down); % GOOFBALL
+
+%%% PLOT
 figure();
 h = pcolor(P_null');
 set(h,'EdgeColor','None')
@@ -246,6 +250,9 @@ diff2 = zeros(1,20);
 for pos = 1:20
     diff2(pos) = Start_Point_174623(pos+1)-Start_Point_174623(pos);
 end
+
+z_diff = bb_rece_data_174623 - Z_values;
+
 
 
 % Timer
